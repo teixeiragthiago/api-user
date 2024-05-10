@@ -3,14 +3,14 @@ package dto
 
 import "time"
 
-type UserDTO struct { //ADD ID AQUI
+type UserDTO struct {
 	ID       uint   `json:"id"`
 	Name     string `json:"name"`
 	Nick     string `json:"nick"`
 	Password string `json:"password"`
 }
 
-type UserResponseDto struct { //ADD ID AQUI
+type UserResponseDto struct {
 	ID        uint      `json:"id"`
 	Name      string    `json:"name"`
 	Nick      string    `json:"nick"`
