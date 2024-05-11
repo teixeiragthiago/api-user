@@ -5,13 +5,16 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/teixeiragthiago/api-user/config"
 	"github.com/teixeiragthiago/api-user/internal/di"
 )
 
 func main() {
 
+	config.LoadConfig()
+	fmt.Printf("Running API on port: %d", config.ApiPort)
+
 	router := di.SetuDependencies()
 
-	fmt.Print("Running API on port 5000")
-	log.Fatal(http.ListenAndServe(":5000", router))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.ApiPort), router))
 }

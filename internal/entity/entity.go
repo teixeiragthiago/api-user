@@ -4,10 +4,10 @@ import "time"
 
 // Represents user in database
 type User struct {
-	ID        uint      `gorm:"primary_key" json:"id"`
-	Name      string    `json:"name"`
-	Nick      string    `json:"nick"`
-	Password  string    `json:"password"`
-	CreatedAt time.Time `json:"createdAt"`
-	Active    bool      `json:"active"`
+	ID        uint      `gorm:"primary_key"; autoIncrement`
+	Name      string    `gorm:"not null"`
+	Nick      string    `gorm:"not null"`
+	Password  string    `gorm:"not null"`
+	CreatedAt time.Time `gorm:"not null"`
+	Active    bool      `gorm:"not null"`
 }

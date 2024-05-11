@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gorilla/mux"
+	"github.com/teixeiragthiago/api-user/config"
 	pingcontroller "github.com/teixeiragthiago/api-user/internal/controller/ping"
 	usercontroller "github.com/teixeiragthiago/api-user/internal/controller/user"
 	"github.com/teixeiragthiago/api-user/internal/entity"
@@ -15,7 +16,7 @@ import (
 )
 
 func setupDatabase() (*gorm.DB, error) {
-	db, err := gorm.Open(mysql.Open("connString"), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(config.ConnectionString), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
@@ -62,12 +63,12 @@ func SetuDependencies() *mux.Router {
 
 	routes.RegisterPing(router, pingController)
 
-	// userController, err := setupUserControllerDependencies()
-	// if err != nil {
-	// 	log.Fatal("Error setting up userControllers")
-	// }
+	userController, err := setupUserControllerDependencies()
+	if err != nil {
+		log.Fatal("Error setting up userControllers")
+	}
 
-	// routes.RegisterUserRoutes(router, userController)
+	routes.RegisterUserRoutes(router, userController)
 
 	return router
 }
