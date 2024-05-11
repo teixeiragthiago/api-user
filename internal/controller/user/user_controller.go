@@ -29,7 +29,7 @@ func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	err = c.userService.RegisterUser(&userDTO)
 	if err != nil {
-		http.Error(w, "Error registering user", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

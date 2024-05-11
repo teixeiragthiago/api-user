@@ -20,6 +20,11 @@ func NewUserService(userRepository repository.UserRepository) UserService {
 }
 
 func (s *userService) RegisterUser(userDTO *dto.UserDTO) error {
+
+	if err := userDTO.Validate(); err != nil {
+		return err
+	}
+
 	user := mapper.MapDtoToEntity(userDTO)
 
 	err := s.userRepository.Save(user)
