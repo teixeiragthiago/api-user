@@ -2,10 +2,10 @@ package routes
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/teixeiragthiago/api-user/internal/controller"
+	usercontroller "github.com/teixeiragthiago/api-user/internal/controller/user"
 )
 
-func SetupRoutes(router *mux.Router, userController *controller.UserController) {
+func RegisterUserRoutes(router *mux.Router, userController *usercontroller.UserController) {
 	router.HandleFunc("/register", userController.RegisterUser).Methods("POST")
 	router.HandleFunc("/user", userController.GetById).Methods("GET")
 }
