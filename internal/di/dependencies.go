@@ -14,12 +14,21 @@ import (
 	"gorm.io/gorm"
 )
 
-// Setup dependencies
-func setupUserControllerDependencies() (*usercontroller.UserController, error) {
-	// Setup database connection, repositories, and services
+func setupDatabase() (*gorm.DB, error) {
 	db, err := gorm.Open(mysql.Open("connString"), &gorm.Config{})
 	if err != nil {
 		return nil, err
+	}
+
+	return db, nil
+}
+
+// Setup dependencies
+func setupUserControllerDependencies() (*usercontroller.UserController, error) {
+	// Setup database connection, repositories, and services
+	db, err := setupDatabase()
+	if err != nil {
+		panic("Erro ao conectar com o banco de dados!")
 	}
 
 	//Migrate the schema
@@ -43,7 +52,7 @@ func setupPingControllerDependencies() (*pingcontroller.PingController, error) {
 	return pingController, nil
 }
 
-func SetupControllers() *mux.Router {
+func SetuDependencies() *mux.Router {
 	router := mux.NewRouter()
 
 	pingController, err := setupPingControllerDependencies()

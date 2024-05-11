@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	router := di.SetupControllers()
+	router := di.SetuDependencies()
 
 	fmt.Print("Running API on port 5000")
 	log.Fatal(http.ListenAndServe(":5000", router))
