@@ -71,7 +71,7 @@ func (s *userService) Update(userDTO *dto.UserDTO) error {
 	}
 
 	if user == nil {
-		return errors.New("user could not be found!")
+		return errors.New("user could not be found")
 	}
 
 	err = s.userRepository.Update(userEntity)
