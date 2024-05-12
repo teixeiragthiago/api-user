@@ -13,7 +13,7 @@ type UserService interface {
 	GetById(id uint) (*dto.UserResponseDto, error)
 	Get(search string) ([]*dto.UserResponseDto, error)
 	Delete(id uint) (string, error)
-	Update(UserDTO *dto.UserDTO) error
+	Update(UserDTO *dto.UserDTO) (string, error)
 }
 
 type userService struct {
@@ -59,25 +59,39 @@ func (s *userService) Get(search string) ([]*dto.UserResponseDto, error) {
 }
 
 func (s *userService) Delete(id uint) (string, error) {
-	panic("uninplemented")
+	user, err := s.userRepository.GetById(id)
+	if err != nil {
+		return "", err
+	}
+
+	if user == nil {
+		return "", errors.New("user could not be found to delete")
+	}
+
+	err = s.userRepository.Delete(user)
+	if err != nil {
+		return "", err
+	}
+
+	return "User removed successfully", nil
 }
 
-func (s *userService) Update(userDTO *dto.UserDTO) error {
+func (s *userService) Update(userDTO *dto.UserDTO) (string, error) {
 
 	userEntity := mapper.MapDtoToEntity(userDTO)
 	user, err := s.userRepository.GetById(userEntity.ID)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if user == nil {
-		return errors.New("user could not be found")
+		return "", errors.New("user could not be found to update")
 	}
 
 	err = s.userRepository.Update(userEntity)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return "User updated successfully", nil
 }
