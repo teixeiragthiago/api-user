@@ -1,16 +1,14 @@
 package mapper
 
 import (
-	"log"
-
 	"github.com/teixeiragthiago/api-user/internal/dto"
 	"github.com/teixeiragthiago/api-user/internal/entity"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/teixeiragthiago/api-user/internal/util"
 )
 
 func MapDtoToEntity(userDTO *dto.UserDTO) *entity.User {
 
-	hashedPassword, _ := hashPassword(userDTO.Password)
+	hashedPassword, _ := util.EncryptPassword(userDTO.Password)
 
 	return &entity.User{
 		ID:       userDTO.ID,
@@ -21,15 +19,6 @@ func MapDtoToEntity(userDTO *dto.UserDTO) *entity.User {
 	}
 }
 
-func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return string(bytes), nil
-}
-
 func MapEntityToResponseDto(user *entity.User) *dto.UserResponseDto {
 	return &dto.UserResponseDto{
 		ID:        user.ID,
@@ -38,4 +27,19 @@ func MapEntityToResponseDto(user *entity.User) *dto.UserResponseDto {
 		Active:    user.Active,
 		CreatedAt: user.CreatedAt,
 	}
+}
+
+func MapEntitiesToResponseDto(users []*entity.User) []*dto.UserResponseDto {
+
+	if len(users) == 0 {
+		return nil
+	}
+
+	var usersDTO []*dto.UserResponseDto
+	for _, user := range users {
+		userDTO := MapEntityToResponseDto(user)
+		usersDTO = append(usersDTO, userDTO)
+	}
+
+	return usersDTO
 }
