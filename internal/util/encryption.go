@@ -20,3 +20,17 @@ func EncryptPassword(password string) (string, error) {
 
 	return string(bytes), nil
 }
+
+func MatchPassword(password string, salt []byte) (bool, error) {
+
+	if password == "" {
+		return false, errors.New("password cannot be empty")
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(password), salt)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
