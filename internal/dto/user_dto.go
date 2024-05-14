@@ -1,4 +1,3 @@
-// internal/dto/user_dto.go
 package dto
 
 import (
@@ -35,7 +34,7 @@ func (u *UserDTO) Validate() error {
 	}
 
 	if len(u.Password) > 12 {
-		return errors.New("password cannot have more than 12 characters")
+		return errors.New("password cannot have more than 12 carac")
 	}
 
 	return nil
