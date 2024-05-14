@@ -34,5 +34,9 @@ func (u *UserDTO) Validate() error {
 		return errors.New("password cannot be empty")
 	}
 
+	if len(u.Password) > 12 {
+		return errors.New("password cannot have more than 12 characters")
+	}
+
 	return nil
 }
