@@ -33,7 +33,7 @@ func setupUserControllerDependencies() (*usercontroller.UserController, error) {
 	}
 
 	//Migrate the schema
-	db.AutoMigrate(&entity.User{})
+	db.AutoMigrate(&entity.User{}, &entity.Post{})
 
 	//Setup repository
 	userRepo := repository.NewUserRepository(db)

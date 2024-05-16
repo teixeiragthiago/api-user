@@ -7,18 +7,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func EncryptPassword(password string) (string, error) {
+func EncryptPassword(password string) ([]byte, error) {
 
 	if password == "" {
-		return "", errors.New("password cannot be empty")
+		return nil, errors.New("password cannot be empty")
 	}
 
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return string(bytes), nil
+	return hashedPassword, nil
 }
 
 func MatchPassword(password string, salt []byte) (bool, error) {

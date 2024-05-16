@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestValidate_MustNotReturnErrorWhenDtoIsValid(t *testing.T) {
+func TestValidate_MustNotReturnError_WhenDtoIsValid(t *testing.T) {
 
 	//Arrange
 	userDTO := GenerateValidUserDTO()
@@ -20,7 +20,7 @@ func TestValidate_MustNotReturnErrorWhenDtoIsValid(t *testing.T) {
 	assert.Empty(err)
 }
 
-func TestValidate_MustReturnErrorWhenNameIsEmpty(t *testing.T) {
+func TestValidate_MustReturnError_WhenNameIsEmpty(t *testing.T) {
 	//Arrange
 	userDTO := GenerateInvalidUserDTO("", "teste", "teste")
 
@@ -35,7 +35,7 @@ func TestValidate_MustReturnErrorWhenNameIsEmpty(t *testing.T) {
 	assert.Equal("name cannot be empty", err.Error())
 }
 
-func TestValidate_MustReturnErrorWhenNickIsEmpty(t *testing.T) {
+func TestValidate_MustReturnError_WhenNickIsEmpty(t *testing.T) {
 	//Arrange
 	userDTO := GenerateInvalidUserDTO("teste", "", "teste")
 
@@ -50,7 +50,7 @@ func TestValidate_MustReturnErrorWhenNickIsEmpty(t *testing.T) {
 	assert.Equal("nick cannot be empty", err.Error())
 }
 
-func TestValidate_MustReturnErrorWhenPasswordIsEmpty(t *testing.T) {
+func TestValidate_MustReturnError_WhenPasswordIsEmpty(t *testing.T) {
 	//Arrange
 	userDTO := GenerateInvalidUserDTO("teste", "teste", "")
 
@@ -65,7 +65,7 @@ func TestValidate_MustReturnErrorWhenPasswordIsEmpty(t *testing.T) {
 	assert.Equal("password cannot be empty", err.Error())
 }
 
-func TestValidate_MustReturnErrorWhenPasswordHasMoreThenTwelveCharacters(t *testing.T) {
+func TestValidate_MustReturnError_WhenPasswordHasMoreThenTwelveCharacters(t *testing.T) {
 	//Arrange
 	userDTO := GenerateInvalidUserDTO("teste", "teste", "123456789101112")
 
