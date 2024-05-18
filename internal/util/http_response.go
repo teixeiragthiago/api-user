@@ -8,14 +8,18 @@ import (
 
 type HttpResponseErrorHandler interface {
 	Error(w http.ResponseWriter, statusCode int, err error)
-	Success(w http.ResponseWriter, statusCode int, err error)
+	Success(w http.ResponseWriter, statusCode int, message string)
 }
 
 type httpResponse struct {
 }
 
-func (e *httpResponse) Success(w http.ResponseWriter, statusCode int, err error) {
-	panic("unimplemented")
+func (e *httpResponse) Success(w http.ResponseWriter, statusCode int, message string) {
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	w.Write([]byte(message))
+
 }
 
 func NewResponseErrorHandler() HttpResponseErrorHandler {

@@ -36,7 +36,7 @@ func (s *userService) RegisterUser(userDTO *dto.UserDTO) error {
 		return errors.New("e-mail already exists")
 	}
 
-	if nicknameExists, err := s.userRepository.Exists("nickname", userDTO.Email); err != nil {
+	if nicknameExists, err := s.userRepository.Exists("nickname", userDTO.Nickname); err != nil {
 		return err
 	} else if nicknameExists {
 		return errors.New("nickname already exists")

@@ -12,12 +12,12 @@ import (
 )
 
 type UserController struct {
-	userService   service.UserService
-	errorResponse util.HttpResponseErrorHandler
+	userService  service.UserService
+	httpResponse util.HttpResponseErrorHandler
 }
 
-func NewUserController(userService service.UserService, errorResponse util.HttpResponseErrorHandler) *UserController {
-	return &UserController{userService, errorResponse}
+func NewUserController(userService service.UserService, httpResponse util.HttpResponseErrorHandler) *UserController {
+	return &UserController{userService, httpResponse}
 }
 
 func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
@@ -25,18 +25,17 @@ func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&userDTO)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		c.httpResponse.Error(w, http.StatusBadRequest, err)
 		return
 	}
 
 	err = c.userService.RegisterUser(&userDTO)
 	if err != nil {
-		c.errorResponse.Error(w, http.StatusBadRequest, err)
+		c.httpResponse.Error(w, http.StatusBadRequest, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("User created with success!"))
+	c.httpResponse.Success(w, http.StatusCreated, "User created successfully!")
 }
 
 func (c *UserController) GetById(w http.ResponseWriter, r *http.Request) {
