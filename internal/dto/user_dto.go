@@ -10,7 +10,7 @@ type UserDTO struct {
 	ID       uint   `json:"id"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`
-	Nick     string `json:"nick"`
+	Nickname string `json:"nickname"`
 	Password string `json:"password"`
 }
 
@@ -18,7 +18,7 @@ type UserResponseDto struct {
 	ID        uint      `json:"id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
-	Nick      string    `json:"nick"`
+	Nickname  string    `json:"nickname"`
 	Active    bool      `json:"isActive"`
 	CreatedAt time.Time `json:"createdAt"`
 }
@@ -28,24 +28,49 @@ func (u *UserDTO) Validate() error {
 		return errors.New("name cannot be empty")
 	}
 
-	if u.Nick == "" {
-		return errors.New("nick cannot be empty")
+	if u.Nickname == "" {
+		return errors.New("nickname cannot be empty")
 	}
 
-	if u.Email == "" {
+	if err := validatePassword(u.Password); err != nil {
+		return err
+	}
+
+	if err := validateEmail(u.Email); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func isValidEmail(email string) bool {
+
+	regex := `^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$`
+
+	re := regexp.MustCompile(regex)
+
+	return re.MatchString(email)
+}
+
+func validateEmail(email string) error {
+
+	if email == "" {
 		return errors.New("e-mail cannot be empty")
 	}
 
-	emailMatch, _ := regexp.MatchString("/^[a-z0-9.]+@[a-z0-9]+\\.[a-z]+\\.([a-z]+)?$/i", u.Email)
-	if !emailMatch {
+	if !isValidEmail(email) {
 		return errors.New("invalid e-mail")
 	}
 
-	if u.Password == "" {
+	return nil
+}
+
+func validatePassword(password string) error {
+	if password == "" {
 		return errors.New("password cannot be empty")
 	}
 
-	if len(u.Password) > 12 {
+	if len(password) > 12 {
 		return errors.New("password cannot have more than 12 characters")
 	}
 

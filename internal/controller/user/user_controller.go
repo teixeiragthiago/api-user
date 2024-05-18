@@ -8,14 +8,16 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/teixeiragthiago/api-user/internal/dto"
 	"github.com/teixeiragthiago/api-user/internal/service"
+	"github.com/teixeiragthiago/api-user/internal/util"
 )
 
 type UserController struct {
-	userService service.UserService
+	userService   service.UserService
+	errorResponse util.HttpResponseErrorHandler
 }
 
-func NewUserController(userService service.UserService) *UserController {
-	return &UserController{userService}
+func NewUserController(userService service.UserService, errorResponse util.HttpResponseErrorHandler) *UserController {
+	return &UserController{userService, errorResponse}
 }
 
 func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +31,7 @@ func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	err = c.userService.RegisterUser(&userDTO)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c.errorResponse.Error(w, http.StatusBadRequest, err)
 		return
 	}
 

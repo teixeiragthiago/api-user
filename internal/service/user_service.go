@@ -30,6 +30,18 @@ func (s *userService) RegisterUser(userDTO *dto.UserDTO) error {
 		return err
 	}
 
+	if emailExists, err := s.userRepository.Exists("email", userDTO.Email); err != nil {
+		return err
+	} else if emailExists {
+		return errors.New("e-mail already exists")
+	}
+
+	if nicknameExists, err := s.userRepository.Exists("nickname", userDTO.Email); err != nil {
+		return err
+	} else if nicknameExists {
+		return errors.New("nickname already exists")
+	}
+
 	user := mapper.MapDtoToEntity(userDTO)
 
 	err := s.userRepository.Save(user)

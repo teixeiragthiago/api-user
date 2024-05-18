@@ -13,7 +13,7 @@ func MapDtoToEntity(userDTO *dto.UserDTO) *entity.User {
 	return &entity.User{
 		ID:       userDTO.ID,
 		Name:     userDTO.Name,
-		Nick:     userDTO.Nick,
+		Nickname: userDTO.Nickname,
 		Password: hashedPassword,
 		Active:   true,
 	}
@@ -23,7 +23,7 @@ func MapEntityToResponseDto(user *entity.User) *dto.UserResponseDto {
 	return &dto.UserResponseDto{
 		ID:        user.ID,
 		Name:      user.Name,
-		Nick:      user.Nick,
+		Nickname:  user.Nickname,
 		Active:    user.Active,
 		CreatedAt: user.CreatedAt,
 	}

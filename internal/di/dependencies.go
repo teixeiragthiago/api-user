@@ -11,6 +11,7 @@ import (
 	"github.com/teixeiragthiago/api-user/internal/repository"
 	"github.com/teixeiragthiago/api-user/internal/routes"
 	"github.com/teixeiragthiago/api-user/internal/service"
+	"github.com/teixeiragthiago/api-user/internal/util"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -41,8 +42,11 @@ func setupUserControllerDependencies() (*usercontroller.UserController, error) {
 	//Setup service
 	userService := service.NewUserService(userRepo)
 
+	//ErrorResponse
+	errorResponse := util.NewResponseErrorHandler()
+
 	//Setup controllers
-	userController := usercontroller.NewUserController(userService)
+	userController := usercontroller.NewUserController(userService, errorResponse)
 
 	return userController, nil
 }
