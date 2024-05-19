@@ -37,7 +37,10 @@ func (r *userRepository) Exists(prop string, input string) (bool, error) {
 func (r *userRepository) Get(search string) ([]*entity.User, error) {
 
 	var users []*entity.User
-	err := r.db.Where("name LIKE '%?%' OR nickname LIKE '%?%'", search).Order("name asc").Find(&users).Error
+
+	sqlQuery := "(name LIKE LOWER(?) OR nickname LIKE LOWER(?) OR email LIKE LOWER(?)) AND active = true"
+	sqlValues := fmt.Sprintf("%%%s%%", search)
+	err := r.db.Where(sqlQuery, sqlValues, sqlValues, sqlValues).Order("name ASC").Find(&users).Error
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +68,6 @@ func (r *userRepository) Delete(user *entity.User) error {
 	return nil
 }
 
-// Update user's data in database
 func (r *userRepository) Update(user *entity.User) error {
 
 	err := r.db.Save(&user).Error

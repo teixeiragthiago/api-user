@@ -38,6 +38,30 @@ func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	c.httpResponse.Success(w, http.StatusCreated, "User created successfully!")
 }
 
+func (c *UserController) Delete(w http.ResponseWriter, r *http.Request) {
+
+	idParam := mux.Vars(r)["id"]
+
+	id, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid User ID", http.StatusBadRequest)
+	}
+
+	_, err = c.userService.GetById(uint(id))
+	if err != nil {
+		http.Error(w, "Error trying to get User", http.StatusBadRequest)
+		return
+	}
+
+	success, err := c.userService.Delete(uint(id))
+	if err != nil {
+		c.httpResponse.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	c.httpResponse.Success(w, http.StatusNoContent, success)
+}
+
 func (c *UserController) GetById(w http.ResponseWriter, r *http.Request) {
 	idParam := mux.Vars(r)["id"]
 
@@ -48,7 +72,7 @@ func (c *UserController) GetById(w http.ResponseWriter, r *http.Request) {
 
 	userResponse, err := c.userService.GetById(uint(id))
 	if err != nil {
-		http.Error(w, "Error trying to get User", http.StatusInternalServerError)
+		http.Error(w, "Error trying to get User", http.StatusBadRequest)
 		return
 	}
 
@@ -61,4 +85,25 @@ func (c *UserController) GetById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(responseJSON)
+}
+
+func (c *UserController) Get(w http.ResponseWriter, r *http.Request) {
+
+	searchParam := r.URL.Query().Get("search")
+
+	users, err := c.userService.Get(searchParam)
+	if err != nil {
+		c.httpResponse.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	responseJson, err := json.Marshal(users)
+	if err != nil {
+		c.httpResponse.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseJson)
 }
