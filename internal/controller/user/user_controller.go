@@ -2,6 +2,7 @@ package usercontroller
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -21,6 +22,7 @@ func NewUserController(userService service.UserService, httpResponse util.HttpRe
 }
 
 func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
+
 	var userDTO dto.UserDTO
 
 	err := json.NewDecoder(r.Body).Decode(&userDTO)
@@ -38,13 +40,32 @@ func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	c.httpResponse.Success(w, http.StatusCreated, "User created successfully!")
 }
 
+func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {
+
+	var userDTO dto.UserDTO
+
+	err := json.NewDecoder(r.Body).Decode(&userDTO)
+	if err != nil {
+		c.httpResponse.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	success, err := c.userService.Update(&userDTO)
+	if err != nil {
+		c.httpResponse.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	c.httpResponse.Success(w, http.StatusOK, success)
+}
+
 func (c *UserController) Delete(w http.ResponseWriter, r *http.Request) {
 
 	idParam := mux.Vars(r)["id"]
 
 	id, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
-		http.Error(w, "Invalid User ID", http.StatusBadRequest)
+		c.httpResponse.Error(w, http.StatusBadRequest, errors.New("invalid user id"))
 	}
 
 	success, err := c.userService.Delete(uint(id))

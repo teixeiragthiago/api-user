@@ -43,6 +43,31 @@ func (u *UserDTO) Validate() error {
 	return nil
 }
 
+func (u *UserDTO) ValidateUpdate() error {
+
+	if u.ID <= 0 {
+		return errors.New("invalid id")
+	}
+
+	if u.Name == "" {
+		return errors.New("name cannot be empty")
+	}
+
+	if u.Nickname == "" {
+		return errors.New("nickname cannot be empty")
+	}
+
+	if err := validatePassword(u.Password); err != nil {
+		return err
+	}
+
+	if err := validateEmail(u.Email); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func isValidEmail(email string) bool {
 
 	regex := `^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$`

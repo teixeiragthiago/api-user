@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/teixeiragthiago/api-user/internal/entity"
 	"gorm.io/gorm"
@@ -15,10 +16,20 @@ type UserRepository interface {
 	Save(user *entity.User) error
 	Delete(user *entity.User) error
 	Update(user *entity.User) error
+	InUseByAnotherUser(userID uint, prop string, input string) (bool, error)
 }
 
 type userRepository struct {
 	db *gorm.DB
+}
+
+func (r *userRepository) InUseByAnotherUser(userID uint, prop string, input string) (bool, error) {
+
+	var user *entity.User
+
+	sqlQuery := fmt.Sprintf("%s = LOWER(?) AND id != ?", prop)
+	result := r.db.Where(sqlQuery, input, userID).First(&user)
+	return result.RowsAffected > 0, nil
 }
 
 func (r *userRepository) Exists(prop string, input string) (bool, error) {
@@ -70,6 +81,7 @@ func (r *userRepository) Delete(user *entity.User) error {
 
 func (r *userRepository) Update(user *entity.User) error {
 
+	user.CreatedAt = time.Now()
 	err := r.db.Save(&user).Error
 	if err != nil {
 		return err

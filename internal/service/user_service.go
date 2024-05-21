@@ -52,6 +52,37 @@ func (s *userService) RegisterUser(userDTO *dto.UserDTO) error {
 	return nil
 }
 
+func (s *userService) Update(userDTO *dto.UserDTO) (string, error) {
+
+	if err := userDTO.ValidateUpdate(); err != nil {
+		return "", err
+	}
+
+	emailInUseAnotherUser, _ := s.userRepository.InUseByAnotherUser(userDTO.ID, "email", userDTO.Email)
+	if emailInUseAnotherUser {
+		return "", errors.New("e-mail already in use by another user")
+	}
+
+	nicknameInUseAnotherUser, _ := s.userRepository.InUseByAnotherUser(userDTO.ID, "nickname", userDTO.Nickname)
+	if nicknameInUseAnotherUser {
+		return "", errors.New("nickname already in use by another user")
+	}
+
+	userEntity := mapper.MapDtoToEntity(userDTO)
+	user, _ := s.userRepository.GetById(userEntity.ID)
+
+	if user == nil {
+		return "", errors.New("user could not be found to update")
+	}
+
+	err := s.userRepository.Update(userEntity)
+	if err != nil {
+		return "", err
+	}
+
+	return "User updated successfully", nil
+}
+
 func (s *userService) GetById(id uint) (*dto.UserResponseDto, error) {
 	user, err := s.userRepository.GetById(id)
 	if err != nil {
@@ -84,24 +115,4 @@ func (s *userService) Delete(id uint) (string, error) {
 	}
 
 	return "User removed successfully", nil
-}
-
-func (s *userService) Update(userDTO *dto.UserDTO) (string, error) {
-
-	userEntity := mapper.MapDtoToEntity(userDTO)
-	user, err := s.userRepository.GetById(userEntity.ID)
-	if err != nil {
-		return "", err
-	}
-
-	if user == nil {
-		return "", errors.New("user could not be found to update")
-	}
-
-	err = s.userRepository.Update(userEntity)
-	if err != nil {
-		return "", err
-	}
-
-	return "User updated successfully", nil
 }

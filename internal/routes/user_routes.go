@@ -10,4 +10,5 @@ func RegisterUserRoutes(router *mux.Router, userController *usercontroller.UserC
 	router.HandleFunc("/user/{id}", userController.GetById).Methods("GET")
 	router.HandleFunc("/user", userController.Get).Methods("GET")
 	router.HandleFunc("/user/{id}", userController.Delete).Methods("DELETE")
+	router.HandleFunc("/user", userController.Update).Methods("PUT")
 }
