@@ -47,12 +47,6 @@ func (c *UserController) Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid User ID", http.StatusBadRequest)
 	}
 
-	_, err = c.userService.GetById(uint(id))
-	if err != nil {
-		http.Error(w, "Error trying to get User", http.StatusBadRequest)
-		return
-	}
-
 	success, err := c.userService.Delete(uint(id))
 	if err != nil {
 		c.httpResponse.Error(w, http.StatusBadRequest, err)

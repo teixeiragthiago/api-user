@@ -71,16 +71,14 @@ func (s *userService) Get(search string) ([]*dto.UserResponseDto, error) {
 }
 
 func (s *userService) Delete(id uint) (string, error) {
-	user, err := s.userRepository.GetById(id)
-	if err != nil {
-		return "", err
-	}
+
+	user, _ := s.userRepository.GetById(id)
 
 	if user == nil {
 		return "", errors.New("user could not be found to delete")
 	}
 
-	err = s.userRepository.Delete(user)
+	err := s.userRepository.Delete(user)
 	if err != nil {
 		return "", err
 	}
