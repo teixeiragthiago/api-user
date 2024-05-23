@@ -58,7 +58,7 @@ func setupPingControllerDependencies() (*pingcontroller.PingController, error) {
 	return pingController, nil
 }
 
-func SetuDependencies() *mux.Router {
+func SetupDependencies() *mux.Router {
 	router := mux.NewRouter()
 
 	pingController, err := setupPingControllerDependencies()
