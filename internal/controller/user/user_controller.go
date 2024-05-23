@@ -91,15 +91,7 @@ func (c *UserController) GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseJSON, err := json.Marshal(userResponse)
-	if err != nil {
-		http.Error(w, "Error encoding/marshing response", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(responseJSON)
+	c.httpResponse.Success(w, http.StatusOK, userResponse)
 }
 
 func (c *UserController) Get(w http.ResponseWriter, r *http.Request) {
@@ -112,13 +104,5 @@ func (c *UserController) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseJson, err := json.Marshal(users)
-	if err != nil {
-		c.httpResponse.Error(w, http.StatusBadRequest, err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(responseJson)
+	c.httpResponse.Success(w, http.StatusOK, users)
 }

@@ -34,6 +34,7 @@ func setupUserControllerDependencies() (*usercontroller.UserController, error) {
 	}
 
 	//Migrate the schema
+	//TODO https://atlasgo.io/guides/orms/gorm
 	db.AutoMigrate(&entity.User{}, &entity.Post{})
 
 	//Setup repository
