@@ -1,6 +1,7 @@
 package di
 
 import (
+	httpSwagger "github.com/swaggo/http-swagger"
 	"log"
 
 	"github.com/gorilla/mux"
@@ -74,6 +75,8 @@ func SetupDependencies() *mux.Router {
 	}
 
 	routes.RegisterUserRoutes(router, userController)
+
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	return router
 }

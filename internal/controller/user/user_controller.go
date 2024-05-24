@@ -21,6 +21,17 @@ func NewUserController(userService service.UserService, httpResponse util.HttpRe
 	return &UserController{userService, httpResponse}
 }
 
+// RegisterUser godoc
+// @Summary Register a new user
+// @Description Register a new user with the given details
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param user body dto.UserDTO true "User data"
+// @Success 201 {string} string "User registered successfully"
+// @Failure 400 {string} string "Invalid request body"
+// @Failure 500 {string} string "Error registering user"
+// @Router /register [post]
 func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	var userDTO dto.UserDTO

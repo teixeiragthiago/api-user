@@ -47,7 +47,7 @@ func TestValidate_MustReturnError_WhenNickIsEmpty(t *testing.T) {
 	//Assert
 	assert.Error(err)
 	assert.NotEmpty(err.Error())
-	assert.Equal("nick cannot be empty", err.Error())
+	assert.Equal("nickname cannot be empty", err.Error())
 }
 
 func TestValidate_MustReturnError_WhenPasswordIsEmpty(t *testing.T) {
