@@ -42,13 +42,13 @@ func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = c.userService.RegisterUser(&userDTO)
+	token, err := c.userService.RegisterUser(&userDTO)
 	if err != nil {
 		c.httpResponse.Error(w, http.StatusBadRequest, err)
 		return
 	}
 
-	c.httpResponse.Success(w, http.StatusCreated, "User created successfully!")
+	c.httpResponse.Success(w, http.StatusCreated, token)
 }
 
 func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {

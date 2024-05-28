@@ -2,7 +2,7 @@ package entity
 
 import "time"
 
-// Represents user in database
+// User Represents user in database
 type User struct {
 	ID        uint      `gorm:"primary_key auto_increment"`
 	Name      string    `gorm:"type:varchar(128)"`

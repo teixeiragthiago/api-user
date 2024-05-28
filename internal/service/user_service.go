@@ -6,10 +6,11 @@ import (
 	"github.com/teixeiragthiago/api-user/internal/dto"
 	"github.com/teixeiragthiago/api-user/internal/mapper"
 	"github.com/teixeiragthiago/api-user/internal/repository"
+	"github.com/teixeiragthiago/api-user/internal/util"
 )
 
 type UserService interface {
-	RegisterUser(UserDTO *dto.UserDTO) error
+	RegisterUser(UserDTO *dto.UserDTO) (string, error)
 	GetById(id uint) (*dto.UserResponseDto, error)
 	Get(search string) ([]*dto.UserResponseDto, error)
 	Delete(id uint) (string, error)
@@ -18,38 +19,49 @@ type UserService interface {
 
 type userService struct {
 	userRepository repository.UserRepository
+	jwtService     util.JwtGeneratorService
 }
 
-func NewUserService(userRepository repository.UserRepository) UserService {
-	return &userService{userRepository}
+func NewUserService(userRepository repository.UserRepository, jwtService util.JwtGeneratorService) UserService {
+	return &userService{userRepository, jwtService}
 }
 
-func (s *userService) RegisterUser(userDTO *dto.UserDTO) error {
+func (s *userService) RegisterUser(userDTO *dto.UserDTO) (string, error) {
 
 	if err := userDTO.Validate(); err != nil {
-		return err
+		return "", err
 	}
 
 	if emailExists, err := s.userRepository.Exists("email", userDTO.Email); err != nil {
-		return err
+		return "", err
 	} else if emailExists {
-		return errors.New("e-mail already exists")
+		return "", errors.New("e-mail already exists")
 	}
 
 	if nicknameExists, err := s.userRepository.Exists("nickname", userDTO.Nickname); err != nil {
-		return err
+		return "", err
 	} else if nicknameExists {
-		return errors.New("nickname already exists")
+		return "", errors.New("nickname already exists")
 	}
 
 	user := mapper.MapDtoToEntity(userDTO)
 
 	err := s.userRepository.Save(user)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	token, err := s.jwtService.GenerateJWT(&util.Claims{
+		ID:       user.ID,
+		Nickname: user.Nickname,
+		Email:    user.Email,
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 func (s *userService) Update(userDTO *dto.UserDTO) (string, error) {

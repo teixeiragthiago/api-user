@@ -1,8 +1,9 @@
 package di
 
 import (
-	httpSwagger "github.com/swaggo/http-swagger"
 	"log"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 
 	"github.com/gorilla/mux"
 	"github.com/teixeiragthiago/api-user/config"
@@ -41,8 +42,11 @@ func setupUserControllerDependencies() (*usercontroller.UserController, error) {
 	//Setup repository
 	userRepo := repository.NewUserRepository(db)
 
+	//TokenGenerator
+	jwtService := util.NewJWTService("CFiNY1d2f3yYxbcVmCYBqTH9wV7R1PemdPdpApGLdQbWLakM95HlFRnhnIncETHV")
+
 	//Setup service
-	userService := service.NewUserService(userRepo)
+	userService := service.NewUserService(userRepo, jwtService)
 
 	//ErrorResponse
 	errorResponse := util.NewResponseErrorHandler()
