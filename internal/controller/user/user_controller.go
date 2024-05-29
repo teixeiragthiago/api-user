@@ -7,16 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/teixeiragthiago/api-user/internal/dto"
 	"github.com/teixeiragthiago/api-user/internal/service"
-	"github.com/teixeiragthiago/api-user/internal/util"
 )
 
 type UserController struct {
-	userService  service.UserService
-	httpResponse util.HttpResponseErrorHandler
+	userService service.UserService
 }
 
-func NewUserController(userService service.UserService, httpResponse util.HttpResponseErrorHandler) *UserController {
-	return &UserController{userService, httpResponse}
+func NewUserController(userService service.UserService) *UserController {
+	return &UserController{userService}
 }
 
 // RegisterUser godoc
@@ -69,7 +67,7 @@ func (uc *UserController) Update(c *gin.Context) {
 	success, err := uc.userService.Update(&userDTO)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": err.Error(),
 		})
 		return
 	}

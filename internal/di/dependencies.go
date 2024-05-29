@@ -48,11 +48,8 @@ func setupUserControllerDependencies() (*usercontroller.UserController, error) {
 	//Setup service
 	userService := service.NewUserService(userRepo, jwtService)
 
-	//ErrorResponse
-	errorResponse := util.NewResponseErrorHandler()
-
 	//Setup controllers
-	userController := usercontroller.NewUserController(userService, errorResponse)
+	userController := usercontroller.NewUserController(userService)
 
 	return userController, nil
 }
