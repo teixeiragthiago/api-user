@@ -4,9 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	httpSwagger "github.com/swaggo/http-swagger"
 
-	"github.com/gorilla/mux"
 	"github.com/teixeiragthiago/api-user/config"
 	pingcontroller "github.com/teixeiragthiago/api-user/internal/controller/ping"
 	usercontroller "github.com/teixeiragthiago/api-user/internal/controller/user"
@@ -64,18 +62,18 @@ func setupPingControllerDependencies() (*pingcontroller.PingController, error) {
 	return pingController, nil
 }
 
-func SetupDependencies() *mux.Router {
-	router := mux.NewRouter()
+func SetupDependencies() *gin.Engine {
+
+	router := gin.Default()
 
 	pingController, err := setupPingControllerDependencies()
 	if err != nil {
 		log.Fatal("Error setting up pingController")
 	}
 
-	ginRouter := gin.Default()
-	routes.RegisterPing(ginRouter, pingController)
+	routes.RegisterPing(router, pingController)
 
-	ginRouter.Run()
+	router.Run(string(config.ApiPort))
 
 	userController, err := setupUserControllerDependencies()
 	if err != nil {
@@ -83,8 +81,6 @@ func SetupDependencies() *mux.Router {
 	}
 
 	routes.RegisterUserRoutes(router, userController)
-
-	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	return router
 }

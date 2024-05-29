@@ -1,12 +1,10 @@
 package usercontroller
 
 import (
-	"encoding/json"
-	"errors"
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/teixeiragthiago/api-user/internal/dto"
 	"github.com/teixeiragthiago/api-user/internal/service"
 	"github.com/teixeiragthiago/api-user/internal/util"
@@ -32,88 +30,170 @@ func NewUserController(userService service.UserService, httpResponse util.HttpRe
 // @Failure 400 {string} string "Invalid request body"
 // @Failure 500 {string} string "Error registering user"
 // @Router /register [post]
-func (c *UserController) RegisterUser(w http.ResponseWriter, r *http.Request) {
+func (uc *UserController) RegisterUser(c *gin.Context) {
 
 	var userDTO dto.UserDTO
 
-	err := json.NewDecoder(r.Body).Decode(&userDTO)
-	if err != nil {
-		c.httpResponse.Error(w, http.StatusBadRequest, err)
+	if err := c.ShouldBindJSON(&userDTO); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
 		return
 	}
 
-	token, err := c.userService.RegisterUser(&userDTO)
+	token, err := uc.userService.RegisterUser(&userDTO)
 	if err != nil {
-		c.httpResponse.Error(w, http.StatusBadRequest, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err,
+		})
 		return
 	}
 
-	c.httpResponse.Success(w, http.StatusCreated, token)
+	c.JSON(http.StatusCreated, gin.H{
+		"token": token,
+	})
+
+	//Utilizando mux
+
+	// err := json.NewDecoder(r.Body).Decode(&userDTO)
+	// if err != nil {
+	// 	c.httpResponse.Error(w, http.StatusBadRequest, err)
+	// 	return
+	// }
+
+	// token, err := c.userService.RegisterUser(&userDTO)
+	// if err != nil {
+	// 	c.httpResponse.Error(w, http.StatusBadRequest, err)
+	// 	return
+	// }
+
+	// c.httpResponse.Success(w, http.StatusCreated, token)
 }
 
-func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {
+func (uc *UserController) Update(c *gin.Context) {
 
 	var userDTO dto.UserDTO
 
-	err := json.NewDecoder(r.Body).Decode(&userDTO)
-	if err != nil {
-		c.httpResponse.Error(w, http.StatusBadRequest, err)
+	if err := c.ShouldBindJSON(&userDTO); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+
 		return
 	}
 
-	success, err := c.userService.Update(&userDTO)
+	success, err := uc.userService.Update(&userDTO)
 	if err != nil {
-		c.httpResponse.Error(w, http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
 		return
 	}
 
-	c.httpResponse.Success(w, http.StatusOK, success)
+	c.JSON(http.StatusOK, gin.H{
+		"message": success,
+	})
+
+	// err := json.NewDecoder(r.Body).Decode(&userDTO)
+	// if err != nil {
+	// 	c.httpResponse.Error(w, http.StatusBadRequest, err)
+	// 	return
+	// }
+
+	// success, err := c.userService.Update(&userDTO)
+	// if err != nil {
+	// 	c.httpResponse.Error(w, http.StatusBadRequest, err)
+	// 	return
+	// }
+
+	// c.httpResponse.Success(w, http.StatusOK, success)
 }
 
-func (c *UserController) Delete(w http.ResponseWriter, r *http.Request) {
+func (uc *UserController) Delete(c *gin.Context) {
 
-	idParam := mux.Vars(r)["id"]
-
-	id, err := strconv.ParseUint(idParam, 10, 64)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.httpResponse.Error(w, http.StatusBadRequest, errors.New("invalid user id"))
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
 	}
 
-	success, err := c.userService.Delete(uint(id))
+	success, err := uc.userService.Delete(uint(id))
 	if err != nil {
-		c.httpResponse.Error(w, http.StatusBadRequest, err)
-		return
+		c.JSON(http.StatusOK, gin.H{
+			"data": success,
+		})
 	}
 
-	c.httpResponse.Success(w, http.StatusNoContent, success)
+	// idParam := mux.Vars(r)["id"]
+
+	// id, err := strconv.ParseUint(idParam, 10, 64)
+	// if err != nil {
+	// 	c.httpResponse.Error(w, http.StatusBadRequest, errors.New("invalid user id"))
+	// }
+
+	// success, err := c.userService.Delete(uint(id))
+	// if err != nil {
+	// 	c.httpResponse.Error(w, http.StatusBadRequest, err)
+	// 	return
+	// }
+
+	// c.httpResponse.Success(w, http.StatusNoContent, success)
 }
 
-func (c *UserController) GetById(w http.ResponseWriter, r *http.Request) {
-	idParam := mux.Vars(r)["id"]
+func (uc *UserController) GetById(c *gin.Context) {
 
-	id, err := strconv.ParseUint(idParam, 10, 64)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		http.Error(w, "Invalid User ID", http.StatusBadRequest)
-	}
-
-	userResponse, err := c.userService.GetById(uint(id))
-	if err != nil {
-		http.Error(w, "Error trying to get User", http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid user ID",
+		})
 		return
 	}
 
-	c.httpResponse.Success(w, http.StatusOK, userResponse)
+	userResponseDTO, err := uc.userService.GetById(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, userResponseDTO)
+
+	// idParam := mux.Vars(r)["id"]
+
+	// id, err := strconv.ParseUint(idParam, 10, 64)
+	// if err != nil {
+	// 	http.Error(w, "Invalid User ID", http.StatusBadRequest)
+	// }
+
+	// userResponse, err := c.userService.GetById(uint(id))
+	// if err != nil {
+	// 	http.Error(w, "Error trying to get User", http.StatusBadRequest)
+	// 	return
+	// }
+
+	// c.httpResponse.Success(w, http.StatusOK, userResponse)
 }
 
-func (c *UserController) Get(w http.ResponseWriter, r *http.Request) {
+func (uc *UserController) Get(c *gin.Context) {
 
-	searchParam := r.URL.Query().Get("search")
+	searchParam := c.Query("search")
 
-	users, err := c.userService.Get(searchParam)
+	users, err := uc.userService.Get(searchParam)
 	if err != nil {
-		c.httpResponse.Error(w, http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.httpResponse.Success(w, http.StatusOK, users)
+	c.JSON(http.StatusOK, users)
+
+	// searchParam := r.URL.Query().Get("search")
+
+	// users, err := c.userService.Get(searchParam)
+	// if err != nil {
+	// 	c.httpResponse.Error(w, http.StatusBadRequest, err)
+	// 	return
+	// }
+
+	// c.httpResponse.Success(w, http.StatusOK, users)
 }
