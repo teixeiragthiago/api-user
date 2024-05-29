@@ -1,6 +1,7 @@
 package di
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -65,6 +66,8 @@ func setupPingControllerDependencies() (*pingcontroller.PingController, error) {
 func SetupDependencies() *gin.Engine {
 
 	router := gin.Default()
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
 
 	pingController, err := setupPingControllerDependencies()
 	if err != nil {
@@ -73,7 +76,7 @@ func SetupDependencies() *gin.Engine {
 
 	routes.RegisterPing(router, pingController)
 
-	router.Run(string(config.ApiPort))
+	router.Run(fmt.Sprintf("%d", config.ApiPort))
 
 	userController, err := setupUserControllerDependencies()
 	if err != nil {
