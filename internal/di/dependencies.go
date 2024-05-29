@@ -3,6 +3,7 @@ package di
 import (
 	"log"
 
+	"github.com/gin-gonic/gin"
 	httpSwagger "github.com/swaggo/http-swagger"
 
 	"github.com/gorilla/mux"
@@ -71,7 +72,10 @@ func SetupDependencies() *mux.Router {
 		log.Fatal("Error setting up pingController")
 	}
 
-	routes.RegisterPing(router, pingController)
+	ginRouter := gin.Default()
+	routes.RegisterPing(ginRouter, pingController)
+
+	ginRouter.Run()
 
 	userController, err := setupUserControllerDependencies()
 	if err != nil {
