@@ -51,7 +51,7 @@ func (s *userService) RegisterUser(userDTO *dto.UserDTO) (string, error) {
 		return "", err
 	}
 
-	token, err := s.jwtService.GenerateJWT(&util.Claims{
+	token, err := s.jwtService.GenerateToken(&util.Claims{
 		ID:       user.ID,
 		Nickname: user.Nickname,
 		Email:    user.Email,

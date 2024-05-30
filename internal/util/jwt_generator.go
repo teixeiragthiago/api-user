@@ -7,8 +7,8 @@ import (
 )
 
 type JwtGeneratorService interface {
-	GenerateJWT(claimsData *Claims) (string, error)
-	ValidateJWT(tokenString string) (*Claims, error)
+	GenerateToken(claimsData *Claims) (string, error)
+	ValidateToken(tokenString string) (*Claims, error)
 }
 
 type jwtService struct {
@@ -26,7 +26,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func (j *jwtService) GenerateJWT(claimsData *Claims) (string, error) {
+func (j *jwtService) GenerateToken(claimsData *Claims) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
 		ID:       claimsData.ID,
@@ -46,7 +46,7 @@ func (j *jwtService) GenerateJWT(claimsData *Claims) (string, error) {
 	return tokenString, nil
 }
 
-func (j *jwtService) ValidateJWT(tokenString string) (*Claims, error) {
+func (j *jwtService) ValidateToken(tokenString string) (*Claims, error) {
 	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {

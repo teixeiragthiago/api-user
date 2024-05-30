@@ -10,6 +10,7 @@ import (
 	pingcontroller "github.com/teixeiragthiago/api-user/internal/controller/ping"
 	usercontroller "github.com/teixeiragthiago/api-user/internal/controller/user"
 	"github.com/teixeiragthiago/api-user/internal/entity"
+	"github.com/teixeiragthiago/api-user/internal/middleware"
 	"github.com/teixeiragthiago/api-user/internal/repository"
 	"github.com/teixeiragthiago/api-user/internal/routes"
 	"github.com/teixeiragthiago/api-user/internal/service"
@@ -43,7 +44,7 @@ func setupUserControllerDependencies() (*usercontroller.UserController, error) {
 	userRepo := repository.NewUserRepository(db)
 
 	//TokenGenerator
-	jwtService := util.NewJWTService("CFiNY1d2f3yYxbcVmCYBqTH9wV7R1PemdPdpApGLdQbWLakM95HlFRnhnIncETHV")
+	jwtService := util.NewJWTService(config.JwtKey)
 
 	//Setup service
 	userService := service.NewUserService(userRepo, jwtService)
@@ -58,6 +59,14 @@ func setupPingControllerDependencies() (*pingcontroller.PingController, error) {
 	pingController := pingcontroller.NewPingController()
 
 	return pingController, nil
+}
+
+func setupAuthMiddleware() (authMiddleware middleware.AuthenticationMiddlewar) {
+
+	jwtService := util.NewJWTService(config.JwtKey)
+
+	return middleware.NewAuthMiddleware(jwtService)
+
 }
 
 func SetupDependencies() *gin.Engine {

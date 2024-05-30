@@ -12,6 +12,7 @@ import (
 var (
 	ApiPort          = 0
 	ConnectionString = ""
+	JwtKey           = ""
 )
 
 func LoadConfig() {
@@ -26,6 +27,8 @@ func LoadConfig() {
 	if err != nil {
 		ApiPort = 5000
 	}
+
+	JwtKey = os.Getenv("JWT_KEY")
 
 	ConnectionString = fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
 		os.Getenv("DB_USER"),
