@@ -20,7 +20,7 @@ func NewJWTService(secretKey string) JwtGeneratorService {
 }
 
 type Claims struct {
-	ID       uint   `json:"ID"`
+	ID       uint   `json:"id"`
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
 	jwt.RegisteredClaims
@@ -50,7 +50,7 @@ func (j *jwtService) ValidateToken(tokenString string) (*Claims, error) {
 	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return j.secretKey, nil
+		return []byte(j.secretKey), nil
 	})
 
 	if err != nil {

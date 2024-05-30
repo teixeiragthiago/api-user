@@ -26,7 +26,7 @@ func (m *authMiddleware) ValidateJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization header"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Uninformed token"})
 			c.Abort()
 			return
 		}
@@ -45,7 +45,7 @@ func (m *authMiddleware) ValidateJWT() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("ID", claims.ID)
+		c.Set("id", claims.ID)
 		c.Set("nickname", claims.Nickname)
 		c.Set("email", claims.Email)
 		c.Next()

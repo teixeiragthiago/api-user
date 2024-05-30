@@ -61,7 +61,7 @@ func setupPingControllerDependencies() (*pingcontroller.PingController, error) {
 	return pingController, nil
 }
 
-func setupAuthMiddleware() (authMiddleware middleware.AuthenticationMiddlewar) {
+func setupAuthMiddleware() middleware.AuthenticationMiddleware {
 
 	jwtService := util.NewJWTService(config.JwtKey)
 
@@ -89,7 +89,9 @@ func SetupDependencies() *gin.Engine {
 		log.Fatal("Error setting up userControllers")
 	}
 
-	routes.RegisterUserRoutes(router, userController)
+	authMiddleware := setupAuthMiddleware()
+
+	routes.RegisterUserRoutes(router, userController, authMiddleware)
 
 	return router
 }
