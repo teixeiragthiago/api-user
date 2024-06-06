@@ -26,7 +26,7 @@ func (m *authMiddleware) ValidateJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Uninformed token"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token not informed"})
 			c.Abort()
 			return
 		}

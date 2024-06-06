@@ -17,6 +17,29 @@ func NewUserController(userService service.UserService) *UserController {
 	return &UserController{userService}
 }
 
+func (uc *UserController) Login(c *gin.Context) {
+	var userDTO dto.UserLoginDto
+
+	if err := c.ShouldBindJSON(&userDTO); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	token, err := uc.userService.Login(&userDTO)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+	})
+}
+
 func (uc *UserController) RegisterUser(c *gin.Context) {
 
 	var userDTO dto.UserDTO

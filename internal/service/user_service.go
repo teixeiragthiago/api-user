@@ -15,6 +15,7 @@ type UserService interface {
 	Get(search string) ([]*dto.UserResponseDto, error)
 	Delete(id uint) (string, error)
 	Update(UserDTO *dto.UserDTO) (string, error)
+	Login(userDTO *dto.UserLoginDto) (string, error)
 }
 
 type userService struct {
@@ -24,6 +25,39 @@ type userService struct {
 
 func NewUserService(userRepository repository.UserRepository, jwtService util.JwtGeneratorService) UserService {
 	return &userService{userRepository, jwtService}
+}
+
+func (s *userService) Login(userDTO *dto.UserLoginDto) (string, error) {
+
+	if err := userDTO.Validate(); err != nil {
+		return "", err
+	}
+
+	userData, err := s.userRepository.GetByEmail(userDTO.Email)
+	if err != nil {
+		return "", err
+	}
+
+	if userData == nil {
+		return "", errors.New("user could not be found")
+	}
+
+	_, err = util.MatchPassword(string(userData.Password), []byte(userDTO.Password))
+	if err != nil {
+		return "", errors.New("invalid password")
+	}
+
+	token, err := s.jwtService.GenerateToken(&util.Claims{
+		ID:       userData.ID,
+		Nickname: userData.Nickname,
+		Email:    userData.Email,
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 func (s *userService) RegisterUser(userDTO *dto.UserDTO) (string, error) {

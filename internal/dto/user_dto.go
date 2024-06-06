@@ -23,6 +23,24 @@ type UserResponseDto struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
+type UserLoginDto struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (u *UserLoginDto) Validate() error {
+
+	if err := validateEmail(u.Email); err != nil {
+		return err
+	}
+
+	if err := validatePassword(u.Password); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (u *UserDTO) Validate() error {
 	if u.Name == "" {
 		return errors.New("name cannot be empty")

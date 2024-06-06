@@ -12,6 +12,7 @@ import (
 type UserRepository interface {
 	GetById(id uint) (*entity.User, error)
 	Get(search string) ([]*entity.User, error)
+	GetByEmail(email string) (*entity.User, error)
 	Exists(prop string, input string) (bool, error)
 	Save(user *entity.User) error
 	Delete(user *entity.User) error
@@ -21,6 +22,16 @@ type UserRepository interface {
 
 type userRepository struct {
 	db *gorm.DB
+}
+
+func (r *userRepository) GetByEmail(email string) (*entity.User, error) {
+	var user entity.User
+	err := r.db.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func (r *userRepository) InUseByAnotherUser(userID uint, prop string, input string) (bool, error) {
