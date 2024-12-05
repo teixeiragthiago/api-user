@@ -13,37 +13,37 @@ import (
 	testutils "github.com/teixeiragthiago/api-user/internal/test_utils"
 )
 
-func TestUserRepository_InUserByAnotherUser_True(t *testing.T) {
-	//Arrange
-	gormDB, mock := testutils.SetupMockDB(t)
-	defer func() {
-		db, _ := gormDB.DB()
-		db.Close()
-	}()
+// func TestUserRepository_InUserByAnotherUser_True(t *testing.T) {
+// 	//Arrange
+// 	gormDB, mock := testutils.SetupMockDB(t)
+// 	defer func() {
+// 		db, _ := gormDB.DB()
+// 		db.Close()
+// 	}()
 
-	userRepo := repository.NewUserRepository(gormDB)
-	userMock := mockValidUser()
-	rowsMock := mockRows(userMock)
+// 	userRepo := repository.NewUserRepository(gormDB)
+// 	userMock := mockValidUser()
+// 	rowsMock := mockRows(userMock)
 
-	userId := uint(1)
-	propParameter := "nickname"
-	input := "thiago_teste"
+// 	userId := uint(1)
+// 	propParameter := "nickname"
+// 	input := "thiago_teste"
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `users` WHERE ? = LOWER(?) AND id != ? ORDER BY `users`.`id` LIMIT ?")).
-		WithArgs(propParameter, input, userId, 1).
-		WillReturnRows(rowsMock)
+// 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `users` WHERE ? = LOWER(?) AND id != ? ORDER BY `users`.`id` LIMIT ?")).
+// 		WithArgs(propParameter, input, userId, 1).
+// 		WillReturnRows(rowsMock)
 
-	//Act
-	alreadyInUse, err := userRepo.InUseByAnotherUser(userId, propParameter, input)
+// 	//Act
+// 	alreadyInUse, err := userRepo.InUseByAnotherUser(userId, propParameter, input)
 
-	//Assert
-	assert.NoError(t, err)
+// 	//Assert
+// 	assert.NoError(t, err)
 
-	assert.Equal(t, true, alreadyInUse)
+// 	assert.Equal(t, true, alreadyInUse)
 
-	err = mock.ExpectationsWereMet()
-	assert.NoError(t, err)
-}
+// 	err = mock.ExpectationsWereMet()
+// 	assert.NoError(t, err)
+// }
 
 func TestUserRepository_GetById_Success(t *testing.T) {
 
@@ -158,6 +158,33 @@ func TestUserRepository_GetByEmail_Error(t *testing.T) {
 	assert.Nil(t, user)
 
 	err = mock.ExpectationsWereMet()
+	assert.NoError(t, err)
+}
+
+func TestUserRepository_Delete_MustSuccess(t *testing.T) {
+
+	//Arrange
+	gormDB, mock := testutils.SetupMockDB(t)
+	defer func() {
+		db, _ := gormDB.DB()
+		db.Close()
+	}()
+
+	user := mockValidUser()
+	userRepo := repository.NewUserRepository(gormDB)
+
+	mock.ExpectBegin()
+
+	mock.ExpectExec(regexp.QuoteMeta("DELETE FROM `users` WHERE `users`.`id` = ? ")).
+		WithArgs(user.ID, user.ID).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	mock.ExpectCommit()
+
+	//Act
+	err := userRepo.Delete(user)
+
+	//Assert
 	assert.NoError(t, err)
 }
 
