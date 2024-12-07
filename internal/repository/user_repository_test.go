@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"testing"
 	"time"
@@ -186,6 +187,100 @@ func TestUserRepository_Delete_MustSuccess(t *testing.T) {
 
 	//Assert
 	assert.NoError(t, err)
+}
+
+func TestUserRepository_Delete_Error(t *testing.T) {
+
+	//Arrange
+	gormDB, mock := testutils.SetupMockDB(t)
+	defer func() {
+		db, _ := gormDB.DB()
+		db.Close()
+	}()
+
+	user := mockValidUser()
+	userRepo := repository.NewUserRepository(gormDB)
+
+	mock.ExpectBegin()
+
+	mock.ExpectExec(regexp.QuoteMeta("DELETE FROM `users` WHERE `users`.`id` = ? ")).
+		WithArgs(user.ID, user.ID).
+		WillReturnError(fmt.Errorf("delete failed"))
+
+	mock.ExpectRollback()
+
+	//Act
+	err := userRepo.Delete(user)
+
+	//Assert
+	assert.Error(t, err)
+	assert.Equal(t, "delete failed", err.Error())
+}
+
+func TestUserRepository_Save_Success(t *testing.T) {
+	//Arrange
+	gormDB, mock := testutils.SetupMockDB(t)
+	defer func() {
+		db, _ := gormDB.DB()
+		db.Close()
+	}()
+
+	user := mockValidUser()
+	userRepo := repository.NewUserRepository(gormDB)
+
+	mock.ExpectBegin()
+
+	mock.ExpectExec("INSERT INTO `users`").
+		WithArgs(
+			user.Name,
+			user.Email,
+			user.Nickname,
+			user.Password,
+			time.Now().Truncate(time.Millisecond),
+			user.Active,
+			user.ID).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	mock.ExpectCommit()
+
+	//Act
+	err := userRepo.Save(user)
+
+	//Assert
+	assert.NoError(t, err)
+}
+
+func TestUserRepository_Save_Error(t *testing.T) {
+	//Arrange
+	gormDB, mock := testutils.SetupMockDB(t)
+	defer func() {
+		db, _ := gormDB.DB()
+		db.Close()
+	}()
+
+	user := mockValidUser()
+	userRepo := repository.NewUserRepository(gormDB)
+
+	mock.ExpectBegin()
+
+	mock.ExpectExec("INSERT INTO `users`").
+		WithArgs(
+			user.Name,
+			user.Email,
+			user.Nickname,
+			user.Password,
+			time.Now().Truncate(time.Millisecond),
+			user.Active,
+			user.ID).
+		WillReturnError(fmt.Errorf("insertion failed"))
+
+	mock.ExpectRollback()
+
+	//Act
+	err := userRepo.Save(user)
+
+	//Assert
+	assert.Error(t, err)
 }
 
 func mockRows(mockUser *entity.User) *sqlmock.Rows {
