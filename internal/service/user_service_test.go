@@ -299,3 +299,83 @@ func TestUserService_RegisterUser_MustReturnErrorWhenNicknameExists(t *testing.T
 	assert.Equal(t, "nickname already exists", err.Error())
 	assert.Empty(t, result)
 }
+
+func TestUserService_Login_MustLoginWithSuccessWhenUserIsValid(t *testing.T) {
+	//Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockUserRepository(ctrl)
+	mockJwtGenerator := utilmocks.NewMockJwtGeneratorService(ctrl)
+	service := NewUserService(mockRepo, mockJwtGenerator)
+
+	mockRepo.EXPECT().GetByEmail(gomock.Any()).Return(testutils.MockValidUser(), nil)
+
+	mockJwtGenerator.EXPECT().GenerateToken(gomock.Any()).Return("token", nil)
+
+	//Act
+	result, err := service.Login(testutils.MockValidUserLoginDto())
+
+	//Assert
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
+}
+
+func TestUserService_Login_MustReturnErrorWhenUserIsInvalid(t *testing.T) {
+	//Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockUserRepository(ctrl)
+	mockJwtGenerator := utilmocks.NewMockJwtGeneratorService(ctrl)
+	service := NewUserService(mockRepo, mockJwtGenerator)
+
+	mockRepo.EXPECT().GetByEmail(gomock.Any()).Return(testutils.MockInvalidUser(), nil)
+
+	//Act
+	result, err := service.Login(testutils.MockInvalidUserLoginDto())
+
+	//Assert
+	assert.Error(t, err)
+	assert.Empty(t, result)
+}
+
+func TestUserService_Login_MustLoginWithSuccessWhenUserIsNotFound(t *testing.T) {
+	//Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockUserRepository(ctrl)
+	mockJwtGenerator := utilmocks.NewMockJwtGeneratorService(ctrl)
+	service := NewUserService(mockRepo, mockJwtGenerator)
+
+	mockRepo.EXPECT().GetByEmail(gomock.Any()).Return(nil, errors.New("user could not be found"))
+
+	//Act
+	result, err := service.Login(testutils.MockValidUserLoginDto())
+
+	//Assert
+	assert.Error(t, err)
+	assert.Equal(t, errors.New("user could not be found"), err)
+	assert.Empty(t, result)
+}
+
+func TestUserService_Login_MustLoginWithSuccessWhenPasswordIsInvalid(t *testing.T) {
+	//Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockUserRepository(ctrl)
+	mockJwtGenerator := utilmocks.NewMockJwtGeneratorService(ctrl)
+	service := NewUserService(mockRepo, mockJwtGenerator)
+
+	mockRepo.EXPECT().GetByEmail(gomock.Any()).Return(testutils.MockValidUser(), nil)
+
+	//Act
+	result, err := service.Login(testutils.MockInvalidUserLoginDto())
+
+	//Assert
+	assert.Error(t, err)
+	assert.Equal(t, errors.New("invalid password"), err)
+	assert.Empty(t, result)
+}
