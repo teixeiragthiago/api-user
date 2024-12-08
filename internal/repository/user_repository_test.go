@@ -14,7 +14,7 @@ import (
 	testutils "github.com/teixeiragthiago/api-user/internal/test_utils"
 )
 
-func TestUserRepository_InUseByAnotherUser_True(t *testing.T) {
+func TestUserRepository_InUseByAnotherUser_MustReturnTrue(t *testing.T) {
 	//Arrange
 	gormDB, mock := testutils.SetupMockDB(t)
 	defer func() {
@@ -46,7 +46,7 @@ func TestUserRepository_InUseByAnotherUser_True(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestUserRepository_GetById_Success(t *testing.T) {
+func TestUserRepository_GetById_MustReturnUserWithSuccess(t *testing.T) {
 
 	//Arrange
 	gormDB, mock := testutils.SetupMockDB(t)
@@ -77,7 +77,7 @@ func TestUserRepository_GetById_Success(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestUserRepository_GetById_Error(t *testing.T) {
+func TestUserRepository_GetById_MustReturnErrorWhenUserIsNotFound(t *testing.T) {
 	//Arrange
 	gormDB, mock := testutils.SetupMockDB(t)
 	defer func() {
@@ -104,7 +104,7 @@ func TestUserRepository_GetById_Error(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestUserRepository_GetByEmail_Success(t *testing.T) {
+func TestUserRepository_GetByEmail_MustReturnSuccess(t *testing.T) {
 
 	//Arrange
 	gormDB, mock := testutils.SetupMockDB(t)
@@ -135,7 +135,7 @@ func TestUserRepository_GetByEmail_Success(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestUserRepository_GetByEmail_Error(t *testing.T) {
+func TestUserRepository_GetByEmail_MustReturnErrorWhenUserIsNotFound(t *testing.T) {
 	//Arrange
 	gormDB, mock := testutils.SetupMockDB(t)
 	defer func() {
@@ -162,7 +162,7 @@ func TestUserRepository_GetByEmail_Error(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestUserRepository_Delete_MustSuccess(t *testing.T) {
+func TestUserRepository_Delete_MustReturnSuccess(t *testing.T) {
 
 	//Arrange
 	gormDB, mock := testutils.SetupMockDB(t)
@@ -187,7 +187,7 @@ func TestUserRepository_Delete_MustSuccess(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestUserRepository_Delete_Error(t *testing.T) {
+func TestUserRepository_Delete_MustReturnError(t *testing.T) {
 
 	//Arrange
 	gormDB, mock := testutils.SetupMockDB(t)
@@ -213,7 +213,7 @@ func TestUserRepository_Delete_Error(t *testing.T) {
 	assert.Equal(t, "delete failed", err.Error())
 }
 
-func TestUserRepository_Save_Success(t *testing.T) {
+func TestUserRepository_Save_MustReturnSuccess(t *testing.T) {
 	//Arrange
 	gormDB, mock := testutils.SetupMockDB(t)
 	defer func() {
@@ -244,7 +244,7 @@ func TestUserRepository_Save_Success(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestUserRepository_Save_Error(t *testing.T) {
+func TestUserRepository_Save_MustReturnError(t *testing.T) {
 	//Arrange
 	gormDB, mock := testutils.SetupMockDB(t)
 	defer func() {
@@ -277,7 +277,7 @@ func TestUserRepository_Save_Error(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestUserRepository_Update_Success(t *testing.T) {
+func TestUserRepository_Update_MustReturnSuccess(t *testing.T) {
 	//Arrange
 	gormDB, mock := testutils.SetupMockDB(t)
 	defer func() {
@@ -309,7 +309,7 @@ func TestUserRepository_Update_Success(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestUserRepository_Update_Error(t *testing.T) {
+func TestUserRepository_Update_MustReturnError(t *testing.T) {
 	//Arrange
 	gormDB, mock := testutils.SetupMockDB(t)
 	defer func() {
