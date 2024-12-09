@@ -58,7 +58,7 @@ func TestUserController_Login_MustReturnUnauthorized(t *testing.T) {
 
 	userController := NewUserController(service)
 
-	body, _ := json.Marshal(testutils.MockValidUserLoginDto())
+	body, _ := json.Marshal(testutils.MockInvalidUserLoginDto())
 	req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
