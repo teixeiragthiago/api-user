@@ -15,7 +15,7 @@ import (
 	testutils "github.com/teixeiragthiago/api-user/internal/test_utils"
 )
 
-func TestUserController_Login_MustReturnSuccess(t *testing.T) {
+func TestUserController_Login_MustReturnOk(t *testing.T) {
 	//Arrange
 	gin.SetMode(gin.TestMode)
 
@@ -28,7 +28,7 @@ func TestUserController_Login_MustReturnSuccess(t *testing.T) {
 	userController := NewUserController(service)
 
 	body, _ := json.Marshal(testutils.MockValidUserLoginDto())
-	req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(body))
+	req := httptest.NewRequest(http.MethodPost, "/user/login", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(rec)
@@ -59,7 +59,7 @@ func TestUserController_Login_MustReturnUnauthorized(t *testing.T) {
 	userController := NewUserController(service)
 
 	body, _ := json.Marshal(testutils.MockInvalidUserLoginDto())
-	req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(body))
+	req := httptest.NewRequest(http.MethodPost, "/user/login", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(rec)
@@ -75,4 +75,64 @@ func TestUserController_Login_MustReturnUnauthorized(t *testing.T) {
 	var response map[string]string
 	_ = json.Unmarshal(rec.Body.Bytes(), &response)
 	assert.Equal(t, "invalid credentials", response["error"])
+}
+
+func TestUserController_RegisterUser_MustReturnOk(t *testing.T) {
+	//Arrange
+	gin.SetMode(gin.TestMode)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	service := userservicemocks.NewMockUserService(ctrl)
+	service.EXPECT().RegisterUser(gomock.Any()).Return("token", nil)
+
+	userController := NewUserController(service)
+
+	body, _ := json.Marshal(testutils.MockValidUserDto())
+	req := httptest.NewRequest(http.MethodPost, "/user", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = req
+
+	//Act
+	userController.RegisterUser(ctx)
+
+	//Assert
+	assert.Equal(t, http.StatusCreated, rec.Code)
+
+	var response map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.Equal(t, "token", response["token"])
+}
+
+func TestUserController_RegisterUser_MustReturnBadRequest(t *testing.T) {
+	//Arrange
+	gin.SetMode(gin.TestMode)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	service := userservicemocks.NewMockUserService(ctrl)
+	service.EXPECT().RegisterUser(gomock.Any()).Return("", errors.New("error creating user"))
+
+	userController := NewUserController(service)
+
+	body, _ := json.Marshal(testutils.MockInvalidUserDto())
+	req := httptest.NewRequest(http.MethodPost, "/user", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = req
+
+	//Act
+	userController.RegisterUser(ctx)
+
+	//Assert
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+	var response map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.Equal(t, "error creating user", response["error"])
 }
