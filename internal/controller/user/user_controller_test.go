@@ -136,3 +136,63 @@ func TestUserController_RegisterUser_MustReturnBadRequest(t *testing.T) {
 	_ = json.Unmarshal(rec.Body.Bytes(), &response)
 	assert.Equal(t, "error creating user", response["error"])
 }
+
+func TestUserController_Update_MustReturnOk(t *testing.T) {
+	//Arrange
+	gin.SetMode(gin.TestMode)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	service := userservicemocks.NewMockUserService(ctrl)
+	service.EXPECT().Update(gomock.Any()).Return("User updated successfully", nil)
+
+	userController := NewUserController(service)
+
+	body, _ := json.Marshal(testutils.MockValidUserLoginDto())
+	req := httptest.NewRequest(http.MethodPut, "/user", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = req
+
+	//Act
+	userController.Update(ctx)
+
+	//Assert
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var response map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.Equal(t, "User updated successfully", response["data"])
+}
+
+func TestUserController_Update_MustReturnBadRequest(t *testing.T) {
+	//Arrange
+	gin.SetMode(gin.TestMode)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	service := userservicemocks.NewMockUserService(ctrl)
+	service.EXPECT().Update(gomock.Any()).Return("", errors.New("Error updating user"))
+
+	userController := NewUserController(service)
+
+	body, _ := json.Marshal(testutils.MockValidUserLoginDto())
+	req := httptest.NewRequest(http.MethodPut, "/user", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = req
+
+	//Act
+	userController.Update(ctx)
+
+	//Assert
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+	var response map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.Equal(t, "Error updating user", response["error"])
+}
