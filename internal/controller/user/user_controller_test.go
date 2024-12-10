@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/teixeiragthiago/api-user/internal/dto"
 	userservicemocks "github.com/teixeiragthiago/api-user/internal/service/mocks"
 	testutils "github.com/teixeiragthiago/api-user/internal/test_utils"
 )
@@ -281,4 +282,92 @@ func TestUserController_Delete_MustReturnBadRequest(t *testing.T) {
 	var response map[string]string
 	_ = json.Unmarshal(rec.Body.Bytes(), &response)
 	assert.Equal(t, "Error deleting user", response["error"])
+}
+
+func TestUserController_GetById_MustReturnOk(t *testing.T) {
+	//Arrange
+	gin.SetMode(gin.TestMode)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	expectedUserResponse := testutils.MockUserResponseDto()
+
+	service := userservicemocks.NewMockUserService(ctrl)
+	service.EXPECT().GetById(gomock.Any()).Return(expectedUserResponse, nil)
+
+	userController := NewUserController(service)
+
+	req := httptest.NewRequest(http.MethodGet, "/user/1", nil)
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = req
+	ctx.Params = []gin.Param{{Key: "id", Value: "1"}}
+
+	//Act
+	userController.GetById(ctx)
+
+	//Assert
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var response map[string]*dto.UserResponseDto
+	_ = json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.Equal(t, expectedUserResponse, response["data"])
+}
+
+func TestUserController_GetById_MustReturnBadRequestWhenIdIsInvalid(t *testing.T) {
+	//Arrange
+	gin.SetMode(gin.TestMode)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	service := userservicemocks.NewMockUserService(ctrl)
+
+	userController := NewUserController(service)
+
+	req := httptest.NewRequest(http.MethodGet, "/user/invalid", nil)
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = req
+	ctx.Params = []gin.Param{{Key: "id", Value: "invalid id"}}
+
+	//Act
+	userController.GetById(ctx)
+
+	//Assert
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+	var response map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.Equal(t, "Invalid user ID", response["error"])
+}
+
+func TestUserController_GetById_MustReturnInternalServerErrorWhenFailed(t *testing.T) {
+	//Arrange
+	gin.SetMode(gin.TestMode)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	service := userservicemocks.NewMockUserService(ctrl)
+	service.EXPECT().GetById(gomock.Any()).Return(nil, errors.New("Error fetching user"))
+
+	userController := NewUserController(service)
+
+	req := httptest.NewRequest(http.MethodGet, "/user/1", nil)
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = req
+	ctx.Params = []gin.Param{{Key: "id", Value: "1"}}
+
+	//Act
+	userController.GetById(ctx)
+
+	//Assert
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+
+	var response map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.Equal(t, "Error fetching user", response["error"])
 }

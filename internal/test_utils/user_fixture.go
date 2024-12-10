@@ -68,3 +68,14 @@ func MockInvalidUserLoginDto() *dto.UserLoginDto {
 		Password: "inválida",
 	}
 }
+
+func MockUserResponseDto() *dto.UserResponseDto {
+	return &dto.UserResponseDto{
+		ID:        1,
+		Name:      "Thiago",
+		Email:     "thiago@teste.com",
+		Nickname:  "thiago_teste",
+		CreatedAt: time.Now().Truncate(time.Millisecond),
+		Active:    true,
+	}
+}
