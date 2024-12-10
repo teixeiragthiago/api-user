@@ -371,3 +371,67 @@ func TestUserController_GetById_MustReturnInternalServerErrorWhenFailed(t *testi
 	_ = json.Unmarshal(rec.Body.Bytes(), &response)
 	assert.Equal(t, "Error fetching user", response["error"])
 }
+
+func TestUserController_Get_MustReturnOk(t *testing.T) {
+	//Arrange
+	gin.SetMode(gin.TestMode)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	service := userservicemocks.NewMockUserService(ctrl)
+
+	mockUsers := []*dto.UserResponseDto{
+		{ID: 1, Name: "John Doe", Email: "john.doe@example.com"},
+		{ID: 2, Name: "Johnny Smith", Email: "johnny.smith@example.com"},
+	}
+
+	service.EXPECT().Get(gomock.Any()).Return(mockUsers, nil)
+
+	userController := NewUserController(service)
+
+	req := httptest.NewRequest(http.MethodGet, "/user?search=teste", nil)
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = req
+
+	//Act
+	userController.Get(ctx)
+
+	//Assert
+	var response map[string]any
+	_ = json.Unmarshal(rec.Body.Bytes(), &response)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.NotNil(t, response["data"])
+	assert.Len(t, mockUsers, 2)
+}
+
+func TestUserController_Get_MustReturnBadRequestWhenIsFailed(t *testing.T) {
+	//Arrange
+	gin.SetMode(gin.TestMode)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	service := userservicemocks.NewMockUserService(ctrl)
+
+	service.EXPECT().Get(gomock.Any()).Return(nil, errors.New("error fetching users"))
+
+	userController := NewUserController(service)
+
+	req := httptest.NewRequest(http.MethodGet, "/user?search=teste", nil)
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = req
+
+	//Act
+	userController.Get(ctx)
+
+	//Assert
+	var response map[string]any
+	_ = json.Unmarshal(rec.Body.Bytes(), &response)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	assert.Equal(t, "error fetching users", response["error"])
+}
