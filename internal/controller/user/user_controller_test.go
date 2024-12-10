@@ -149,7 +149,7 @@ func TestUserController_Update_MustReturnOk(t *testing.T) {
 
 	userController := NewUserController(service)
 
-	body, _ := json.Marshal(testutils.MockValidUserLoginDto())
+	body, _ := json.Marshal(testutils.MockValidUserDto())
 	req := httptest.NewRequest(http.MethodPut, "/user", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
@@ -179,7 +179,7 @@ func TestUserController_Update_MustReturnBadRequest(t *testing.T) {
 
 	userController := NewUserController(service)
 
-	body, _ := json.Marshal(testutils.MockValidUserLoginDto())
+	body, _ := json.Marshal(testutils.MockValidUserDto())
 	req := httptest.NewRequest(http.MethodPut, "/user", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
@@ -195,4 +195,90 @@ func TestUserController_Update_MustReturnBadRequest(t *testing.T) {
 	var response map[string]string
 	_ = json.Unmarshal(rec.Body.Bytes(), &response)
 	assert.Equal(t, "Error updating user", response["error"])
+}
+
+func TestUserController_Delete_MustReturnOk(t *testing.T) {
+	//Arrange
+	gin.SetMode(gin.TestMode)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	service := userservicemocks.NewMockUserService(ctrl)
+	service.EXPECT().Delete(gomock.Any()).Return("User deleted successfully", nil)
+
+	userController := NewUserController(service)
+
+	req := httptest.NewRequest(http.MethodDelete, "/user/1", nil)
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = req
+	ctx.Params = []gin.Param{{Key: "id", Value: "1"}}
+
+	//Act
+	userController.Delete(ctx)
+
+	//Assert
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var response map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.Equal(t, "User deleted successfully", response["data"])
+}
+
+func TestUserController_Delete_MustReturnBadRequestWhenIdIsInvalid(t *testing.T) {
+	//Arrange
+	gin.SetMode(gin.TestMode)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	service := userservicemocks.NewMockUserService(ctrl)
+
+	req := httptest.NewRequest(http.MethodDelete, "/user/invalid", nil)
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = req
+	ctx.Params = []gin.Param{{Key: "id", Value: "invalid id"}}
+
+	userController := NewUserController(service)
+
+	//Act
+	userController.Delete(ctx)
+
+	//Assert
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+	var response map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.Equal(t, "Error converting parameter `id`", response["error"])
+}
+
+func TestUserController_Delete_MustReturnBadRequest(t *testing.T) {
+	//Arrange
+	gin.SetMode(gin.TestMode)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	service := userservicemocks.NewMockUserService(ctrl)
+	service.EXPECT().Delete(gomock.Any()).Return("", errors.New("Error deleting user"))
+
+	userController := NewUserController(service)
+
+	req := httptest.NewRequest(http.MethodDelete, "/user/1", nil)
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = req
+	ctx.Params = []gin.Param{{Key: "id", Value: "1"}}
+
+	//Act
+	userController.Delete(ctx)
+
+	//Assert
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+	var response map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.Equal(t, "Error deleting user", response["error"])
 }

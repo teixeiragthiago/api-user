@@ -92,18 +92,25 @@ func (uc *UserController) Update(c *gin.Context) {
 func (uc *UserController) Delete(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	if err != nil || id <= 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "Error converting parameter `id`",
 		})
+		return
 	}
 
 	success, err := uc.userService.Delete(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNoContent, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Error deleting user",
+		})
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{
 			"data": success,
 		})
 	}
+
 }
 
 func (uc *UserController) GetById(c *gin.Context) {
